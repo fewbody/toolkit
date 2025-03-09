@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Physics Research Toolkit | Jin Lei</title>
+    <style>
+        :root {
+            --main-bg-color: #0a0e17;
+            --nav-bg-color: #141c2e;
+            --accent-color: #00e5ff;
+            --accent-color-alt: #d500f9;
+            --text-color: #e0e0e0;
+            --card-bg-color: rgba(16, 27, 45, 0.7);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Orbitron', sans-serif;
+        }
+        
+        body {
+            background-color: var(--main-bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(0, 229, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(213, 0, 249, 0.05) 0%, transparent 50%);
+        }
+        
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--accent-color);
+            opacity: 0.4;
+            box-shadow: 0 0 10px 2px var(--accent-color);
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.4;
+            }
+            90% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        header {
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-color-alt));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
+        }
+        
+        h2 {
+            font-size: 1.2rem;
+            font-weight: 400;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 0 2rem;
+            max-width: 1400px;
+            margin: 0 auto 2rem;
+        }
+        
+        .card {
+            background: var(--card-bg-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-color-alt));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 229, 255, 0.3);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+        }
+        
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover .card-icon {
+            color: var(--accent-color-alt);
+            transform: scale(1.1);
+        }
+        
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .card p {
+            color: rgba(224, 224, 224, 0.7);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+        
+        .card-link {
+            display: inline-block;
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.1), rgba(213, 0, 249, 0.1));
+            color: var(--accent-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            text-align: center;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .card-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.2), rgba(213, 0, 249, 0.2));
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .card-link:hover {
+            color: white;
+            border: 1px solid rgba(0, 229, 255, 0.6);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+        }
+        
+        .card-link:hover::before {
+            transform: scaleX(1);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(0, 229, 255, 0.1);
+            background: rgba(16, 27, 45, 0.5);
+        }
+        
+        footer p {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            line-height: 1.6;
+        }
+        
+        footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        footer a:hover {
+            color: var(--accent-color-alt);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .grid-container {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+            
+            .card {
+                min-height: auto;
+            }
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="particles-container" id="particles-container"></div>
+    
+    <header>
+        <div class="header-content">
+            <h1>Nuclear Physics Research Toolkit</h1>
+            <h2>Advanced computational tools for nuclear research</h2>
+        </div>
+    </header>
+    
+    <main>
+        <div class="grid-container">
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-atom"></i>
+                </div>
+                <h3>FRESCO Input Generator</h3>
+                <p>A user-friendly tool for generating input files for the FRESCO nuclear reaction code. Generate inputs for elastic scattering, inelastic scattering, breakup with CDCC method, transfer reaction, and capture reaction.</p>
+                <a href="https://jinlei.fewbody.com/fresco/" class="card-link">Access Tool <i class="fas fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>PhysRevPlotter</h3>
+                <p>Scientific plotting tool designed specifically for physics journal papers. Create publication-ready figures with professional styling and formatting.</p>
+                <a href="https://fewbody.com/plot/" class="card-link">Access Tool <i class="fas fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <h3>Recent Nuclear Theory Publications</h3>
+                <p>Stay updated with recently published papers in nuclear physics journals. The database is updated daily at approximately 9:00 AM.</p>
+                <a href="https://fewbody.com/papers/" class="card-link">Access Tool <i class="fas fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>Nuclear Physics Research Assistant</h3>
+                <p>Ask questions about nuclear theory and get AI-powered explanations with arXiv paper references. An intelligent guide for your nuclear physics research.</p>
+                <a href="https://fewbody.com/search/" class="card-link">Access Tool <i class="fas fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3>COLOSS</h3>
+                <p>Complex-scaled Optical and couLOmb Scattering Solver. A sophisticated computational tool for nuclear reaction calculations.</p>
+                <div style="display: flex; gap: 10px">
+                    <a href="https://github.com/jinleiphys/COLOSS" class="card-link" style="flex: 1">GitHub <i class="fab fa-github"></i></a>
+                    <a href="https://www.sciencedirect.com/science/article/abs/pii/S0010465525000712?via%3Dihub" class="card-link" style="flex: 1">Paper <i class="fas fa-file-alt"></i></a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>Designed and made by <a href="http://jinlei.fewbody.com/">Jin Lei</a>. Supported by the National Natural Science Foundation of China (Grants No. 12475132). If you find any bugs or errors related to this website, please <a href="mailto:jinl@tongji.edu.cn">email me</a>.</p>
+    </footer>
+    
+    <script>
+        // Create floating particles effect
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.getElementById('particles-container');
+            const particleCount = 40;
+            
+            for (let i = 0; i < particleCount; i++) {
+                createParticle();
+            }
+            
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random position
+                const posX = Math.random() * window.innerWidth;
+                const posY = Math.random() * window.innerHeight * 2;
+                
+                // Random size
+                const size = Math.random() * 10 + 2;
+                
+                // Random opacity
+                const opacity = Math.random() * 0.5 + 0.1;
+                
+                // Random color (alternate between accent colors)
+                const useAltColor = Math.random() > 0.7;
+                const color = useAltColor ? '#d500f9' : '#00e5ff';
+                
+                // Random animation duration
+                const duration = Math.random() * 40 + 10;
+                
+                // Set styles
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}px`;
+                particle.style.top = `${posY}px`;
+                particle.style.opacity = opacity.toString();
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 ${size}px ${size/2}px ${color}`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                
+                particlesContainer.appendChild(particle);
+                
+                // Remove and recreate particle when animation ends
+                particle.addEventListener('animationend', function() {
+                    particle.remove();
+                    createParticle();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
