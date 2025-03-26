@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSatchler - Nuclear Physics Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Add Marked.js for Markdown parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <!-- Add KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js"></script>
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3a7bd5;
+            --secondary-color: #00d2ff;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --highlight-color: #ffd700;
+            --accent-color: #70e000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+
+        .card {
+            background-color: var(--card-color);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            flex: 1;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-header {
+            margin-bottom: 15px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 15px;
+            height: 400px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: var(--primary-color);
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .assistant-message {
+            background-color: #e6e6e6;
+            color: var(--text-color);
+            align-self: flex-start;
+        }
+
+        /* Enhanced styling for markdown content */
+        .assistant-message p {
+            margin-bottom: 1em;
+        }
+
+        .assistant-message h1, 
+        .assistant-message h2, 
+        .assistant-message h3, 
+        .assistant-message h4 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            font-weight: bold;
+        }
+
+        .assistant-message h1 { font-size: 1.8em; }
+        .assistant-message h2 { font-size: 1.5em; }
+        .assistant-message h3 { font-size: 1.3em; }
+        .assistant-message h4 { font-size: 1.1em; }
+
+        .assistant-message ul, 
+        .assistant-message ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+
+        .assistant-message li {
+            margin-bottom: 0.5em;
+        }
+
+        .assistant-message a {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        .assistant-message blockquote {
+            border-left: 3px solid #ccc;
+            margin-left: 0.5em;
+            padding-left: 0.8em;
+            color: #666;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 30px;
+            background-color: #f0f0f0;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .send-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: var(--card-color);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            flex: 0.5;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .info-item {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .info-item h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .info-item p {
+            font-size: 14px;
+            color: #777;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .system-message {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .quick-button {
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .quick-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+        }
+
+        /* Syntax highlighting for code blocks */
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .katex-display {
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <div class="title">DeepSatchler</div>
+            <div class="subtitle">Your AI Assistant for Nuclear Physics</div>
+        </div>
+        <div class="avatar">
+            <i class="fas fa-atom"></i>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>Ask about Direct Nuclear Reactions</h2>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message assistant-message">
+                        Hello! I'm DeepSatchler, your AI assistant for understanding Satchler's "Direct Nuclear Reactions." How can I help you today?
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button class="quick-button" onclick="askQuestion('What are direct nuclear reactions?')">What are direct nuclear reactions?</button>
+                    <button class="quick-button" onclick="askQuestion('Explain DWBA')">Explain DWBA</button>
+                    <button class="quick-button" onclick="askQuestion('Optical potential')">Optical potential</button>
+                </div>
+                <div class="chat-input">
+                    <input type="text" class="input-field" id="user-input" placeholder="Type your question here..." onkeydown="if(event.key === 'Enter') sendMessage()">
+                    <button class="send-button" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-section">
+                <h3>Key Topics</h3>
+                <div class="info-item" onclick="askQuestion('Explain scattering theory')">
+                    <h4>Scattering Theory</h4>
+                    <p>Foundational concepts in nuclear scattering</p>
+                </div>
+                <div class="info-item" onclick="askQuestion('What is the Distorted Wave Born Approximation?')">
+                    <h4>DWBA</h4>
+                    <p>Distorted Wave Born Approximation</p>
+                </div>
+                <div class="info-item" onclick="askQuestion('Explain optical model in nuclear physics')">
+                    <h4>Optical Model</h4>
+                    <p>Complex potentials and absorption effects</p>
+                </div>
+            </div>
+            <div class="info-section">
+                <h3>Recent Searches</h3>
+                <div id="recent-searches">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>DeepSatchler is designed to help students and researchers understand concepts from Satchler's "Direct Nuclear Reactions"</p>
+    </footer>
+
+    <script>
+        // Configuration
+        const APP_ID = 'abdfcd0da53e4b87a851970a073e179d';
+        const API_KEY = 'sk-497a22d6d2ac43b7b62a8a12470b4372';
+        const API_ENDPOINT = 'https://dashscope.aliyuncs.com/api/v1/apps/' + APP_ID + '/completion';
+        
+        let sessionId = null;
+        let recentQuestions = [];
+        let currentResponseDiv = null;
+        
+        // Marked.js configuration for handling markdown
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+        
+        // Initialize recent searches
+        function initRecentSearches() {
+            const stored = localStorage.getItem('recentSearches');
+            if (stored) {
+                recentQuestions = JSON.parse(stored).slice(0, 3);
+                updateRecentSearchesUI();
+            }
+        }
+        
+        // Update the UI for recent searches
+        function updateRecentSearchesUI() {
+            const container = document.getElementById('recent-searches');
+            container.innerHTML = '';
+            
+            recentQuestions.forEach(question => {
+                const div = document.createElement('div');
+                div.className = 'info-item';
+                div.onclick = () => askQuestion(question);
+                
+                const h4 = document.createElement('h4');
+                h4.textContent = question.length > 30 ? question.substring(0, 30) + '...' : question;
+                
+                div.appendChild(h4);
+                container.appendChild(div);
+            });
+        }
+        
+        // Add a message to the chat
+        function addMessage(text, isUser = false) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
+            
+            if (isUser) {
+                messageDiv.textContent = text;
+            } else {
+                // Process markdown for assistant messages
+                messageDiv.innerHTML = marked.parse(text);
+                
+                // Render math expressions
+                renderMathInElement(messageDiv, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                    ],
+                    throwOnError: false
+                });
+                
+                // Apply syntax highlighting for code blocks
+                messageDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return messageDiv;
+        }
+        
+        // Add a system message
+        function addSystemMessage(text) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'system-message';
+            messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Show loading indicator
+        function showLoading() {
+            const messagesContainer = document.getElementById('chat-messages');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading-indicator';
+            loadingDiv.className = 'message assistant-message';
+            
+            const loadingSpinner = document.createElement('div');
+            loadingSpinner.className = 'loading';
+            
+            const loadingText = document.createTextNode('Thinking...');
+            
+            loadingDiv.appendChild(loadingSpinner);
+            loadingDiv.appendChild(loadingText);
+            
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Hide loading indicator
+        function hideLoading() {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.remove();
+            }
+        }
+        
+        // Process a chunk of streaming response
+        function processStreamingChunk(chunk, responseDivId) {
+            // For incremental streaming, each chunk builds on previous chunks
+            if (!document.getElementById(responseDivId)) {
+                // Create a new response div with the ID
+                const messagesContainer = document.getElementById('chat-messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.id = responseDivId;
+                messageDiv.className = 'message assistant-message';
+                messagesContainer.appendChild(messageDiv);
+                currentResponseDiv = messageDiv;
+            }
+            
+            // Update the response div with the markdown-rendered chunk
+            const responseDiv = document.getElementById(responseDivId);
+            responseDiv.innerHTML = marked.parse(chunk);
+            
+            // Render math expressions
+            renderMathInElement(responseDiv, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                ],
+                throwOnError: false
+            });
+            
+            // Apply syntax highlighting for code blocks
+            responseDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+            
+            // Auto-scroll to the latest content
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Send a message to the API with streaming enabled
+        async function callAPIWithStreaming(prompt) {
+            try {
+                const responseId = 'response-' + Date.now();
+                let fullResponse = '';
+                
+                const data = {
+                    input: {
+                        prompt: prompt
+                    },
+                    parameters: {
+                        incremental_output: true
+                    },
+                    debug: {}
+                };
+                
+                // Add session ID if we have one
+                if (sessionId) {
+                    data.input.session_id = sessionId;
+                }
+                
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json',
+                        'X-DashScope-SSE': 'enable' // Enable server-sent events for streaming
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                hideLoading(); // Hide loading indicator before starting stream
+                
+                // Set up event source for streaming response
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data:')) {
+                            try {
+                                const jsonData = JSON.parse(line.substring(5));
+                                
+                                // Save session ID if present
+                                if (jsonData.output && jsonData.output.session_id) {
+                                    sessionId = jsonData.output.session_id;
+                                }
+                                
+                                // Process text content
+                                if (jsonData.output && jsonData.output.text) {
+                                    fullResponse += jsonData.output.text;
+                                    processStreamingChunk(fullResponse, responseId);
+                                }
+                            } catch (e) {
+                                console.error('Error parsing streaming JSON:', e);
+                            }
+                        }
+                    }
+                }
+                
+                return fullResponse;
+            } catch (error) {
+                console.error('API streaming call failed:', error);
+                hideLoading();
+                addMessage("Sorry, I encountered an error while trying to process your request. Please try again later.");
+                return null;
+            }
+        }
+        
+        // Pre-filled question handler
+        async function askQuestion(question) {
+            const inputField = document.getElementById('user-input');
+            inputField.value = question;
+            await sendMessage();
+        }
+        
+        // Send message handler
+        async function sendMessage() {
+            const inputField = document.getElementById('user-input');
+            const userMessage = inputField.value.trim();
+            
+            if (!userMessage) return;
+            
+            // Add user message to chat
+            addMessage(userMessage, true);
+            
+            // Clear input field
+            inputField.value = '';
+            
+            // Save to recent questions
+            if (!recentQuestions.includes(userMessage)) {
+                recentQuestions.unshift(userMessage);
+                recentQuestions = recentQuestions.slice(0, 3);
+                localStorage.setItem('recentSearches', JSON.stringify(recentQuestions));
+                updateRecentSearchesUI();
+            }
+            
+            // Show loading indicator
+            showLoading();
+            
+            // Prepare context about Satchler's book
+            const contextPrompt = `I'm asking about concepts from Satchler's book "Direct Nuclear Reactions". Please format your response in markdown. ${userMessage}`;
+            
+            // Call the API with streaming
+            await callAPIWithStreaming(contextPrompt);
+        }
+        
+        // Initialize
+        window.onload = function() {
+            initRecentSearches();
+            
+            // Focus on input field
+            document.getElementById('user-input').focus();
+        };
+    </script>
+</body>
+</html>
